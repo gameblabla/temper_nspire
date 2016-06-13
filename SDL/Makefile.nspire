@@ -1,0 +1,40 @@
+# PCE emulator makefile
+# Gilead Kutnick - Exophase
+
+# Global definitions
+
+AS 		  = nspire-as
+CC        = nspire-gcc
+STRIP     = 
+
+OBJS      = main.o cpu.o memory.o irq.o io.o video.o timer.o psg.o disasm.o    \
+            screen.o event.o audio.o menu.o debug.o cd.o adpcm.o   \
+            arcade_card.o bin_cue.o                                            \
+            nsp_main.o nsp_screen.o SDL_audio.o SDL_event.o SDL_menu.o n2DLib.o
+BIN       ?= temper 
+
+# Platform specific definitions 
+
+VPATH      += .. ../SDL 
+VPATH      += ../arm
+CFLAGS     += -DNSPIRE_BUILD -mcpu=arm926ej-s -mtune=arm926ej-s
+CFLAGS     += -Ofast -std=c99 -funsigned-char -msoft-float
+INCLUDES   =
+LIBS       = -Wl,--as-needed -flto -lSDL
+
+# Compilation:
+
+.SUFFIXES: .c .S
+
+%.o: %.c
+	${CC} ${CFLAGS} ${INCLUDES} -c -o $@ $<
+
+%.o: %.S
+	${AS} -o $@ $<
+
+all:	${OBJS}
+	${CC} ${OBJS} ${LIBS} -o ${BIN}  
+
+clean:
+	rm -f *.o ${BIN} 
+
