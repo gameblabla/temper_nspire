@@ -22,30 +22,30 @@ u32 key_map(u32 keys)
       return CONFIG_BUTTON_I;
 
     case SDLK_s:
-    case SDLK_LALT:
+    case SDLK_LSHIFT:
       return CONFIG_BUTTON_II;
 
     case SDLK_a:
-    case SDLK_LSHIFT:
+    case SDLK_BACKSPACE:
       return CONFIG_BUTTON_III;
 
     case SDLK_c:
-    case SDLK_SPACE:
+    case SDLK_7:
       return CONFIG_BUTTON_IV;
 
     case SDLK_x:
-    case SDLK_TAB:
+    case SDLK_8:
       return CONFIG_BUTTON_V;
 
     case SDLK_z:
-    case SDLK_BACKSPACE:
+    case SDLK_9:
       return CONFIG_BUTTON_VI;
 
     case SDLK_RETURN:
       return CONFIG_BUTTON_RUN;
 
     case SDLK_RSHIFT:
-    case SDLK_ESCAPE:
+    case SDLK_TAB:
       return CONFIG_BUTTON_SELECT;
 
     default:
