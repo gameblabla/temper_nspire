@@ -58,7 +58,6 @@ void synchronize()
 
 void platform_initialize()
 {
-	SDL_Init(SDL_INIT);
 	initBuffering();
 	clearBufferB();
 	updateScreen();
