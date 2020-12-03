@@ -118,10 +118,6 @@ void update_events(void)
         case KEY_ACTION_SPR_OFF:
           config.spr_off ^= 1;
           break;
-
-        case KEY_ACTION_DEBUG_BREAK:
-          set_debug_mode(DEBUG_STEP);
-          break;
       }
 
       if(event_input.hat_status != HAT_STATUS_NONE)

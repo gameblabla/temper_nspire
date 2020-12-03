@@ -162,14 +162,12 @@ void reset_memory();
 
 
 #define store_mem_zp(src, address)                                            \
-  check_write_breakpoint(src, (address + 0x2000));                            \
   zero_page[address] = src                                                    \
 
 #define store_mem(src, address)                                               \
 {                                                                             \
   u32 _address = address;                                                     \
   u8 *mpr_translated_value = memory.mpr_translated[0x8 + (_address >> 13)];   \
-  check_write_breakpoint(src, _address);                                      \
   cpu.cycles_remaining = cpu_cycles_remaining;                                \
                                                                               \
   if(!mpr_check_ext(mpr_translated_value))                                    \
@@ -195,7 +193,6 @@ void reset_memory();
 {                                                                             \
   u32 _address = address;                                                     \
   u8 *mpr_translated_value = memory.mpr_translated[_address >> 13];           \
-  check_write_breakpoint(var, _address);                                      \
   cpu.cycles_remaining = cpu_cycles_remaining;                                \
                                                                               \
   if(!mpr_check_ext(mpr_translated_value))                                    \

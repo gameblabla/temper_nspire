@@ -2507,17 +2507,7 @@ void render_line_sgx(void)
     }                                                                         \
   }                                                                           \
 
-#ifdef DEBUGGER_ON
-
-#define mask_sprite()                                                         \
-  if(debug.sprite_mask & (1ULL << i))                                         \
-    continue                                                                  \
-
-#else
-
-#define mask_sprite()                                                         \
-
-#endif
+#define mask_sprite()                                                         
 
 #define update_satb_maker(limit_check)                                        \
 void update_satb_##limit_check(vdc_struct *vdc)                               \
@@ -3156,7 +3146,7 @@ void update_frame(u32 skip)
   }
 
 
-  if(config.show_fps)
+  /*if(config.show_fps)
   {
     static u32 frames = 0;
     static u32 fps = 60;
@@ -3186,7 +3176,7 @@ void update_frame(u32 skip)
     sprintf(print_buffer, "%02d/60", fps);
     print_string(print_buffer, 0xFFFF, 0x000, vce.screen_center_offset, 0,
      vce.screen_width);
-  }
+  }*/
 
   update_status_message();
 

@@ -1,11 +1,6 @@
 #ifndef PLATFORM_DEFINES_H
 #define PLATFORM_DEFINES_H
 
-// Everything here must be C preprocessor material only. That way even
-// assembler files can load this.
-
-#define DEBUGGER_ON
-
 #ifdef GP2X_BUILD
 
 #define GP2X_OR_WIZ_BUILD
@@ -168,7 +163,8 @@
 #ifdef NSPIRE_BUILD
 
 #define COLOR_RGB_565
-
+#define ARM_ARCH
+#define ARM_V5
 #define KEYBOARD_SUPPORT
 #define DIR_SEPARATOR_CHAR '/'
 #define DIR_SEPARATOR_CHAR_STR "/"

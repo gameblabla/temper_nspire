@@ -10,6 +10,11 @@ cd_struct cd;
 
 #endif
 
+
+const u32 step_fractional_bits_clock = 12;
+const u32 step_fractional_bits_frequency = 27;
+const u32 step_fractional_bits_noise = 14;
+
 scsi_command_struct scsi_commands[256];
 
 #define u8_to_bcd(value)                                                      \
@@ -746,7 +751,6 @@ void cd_fadeout(u32 value)
     // Set ADPCM/CD to full volume
     case 0x0:
       cd_full_volume();
-      adpcm_full_volume();
       break;
 
     // Fade CD volume out slowly (6s intervals)
@@ -755,21 +759,10 @@ void cd_fadeout(u32 value)
       cd_fade_out_rate(6500);
       break;
 
-    // Fade ADPCM out slowly (6s intervals)
-    case 0xA:
-      adpcm_fade_out(6000);
-      break;
-
     // Fade CD out quickly (2.5s intervals), ADPCM full volume
     case 0xC:
     case 0xD:
       cd_fade_out_rate(2500);
-      adpcm_full_volume();
-      break;
-
-    // Fade ADPCM out quickly (2.5s intervals)
-    case 0xE:
-      adpcm_fade_out(2500);
       break;
   }
 }
@@ -988,108 +981,6 @@ void update_cd_read()
 
 void update_cdda()
 {
-  s32 clock_delta =
-   (cpu.global_cycles << step_fractional_bits_clock) - cd.last_cdda_cycles;
-  cd.last_cdda_cycles += clock_delta;
-
-  if(cd.cdda_fade_cycles)
-  {
-    cd.cdda_fade_cycles -= (clock_delta >> step_fractional_bits_clock);
-    if(cd.cdda_fade_cycles <= 0)
-    {
-      cd.cdda_volume--;
-      if(cd.cdda_volume == 0)
-        cd.cdda_fade_cycles = 0;
-      else
-        cd.cdda_fade_cycles += cd.cdda_fade_cycle_interval;
-    }
-  }
-
-  if(cd.cdda_access_cycles)
-  {
-    cd.cdda_access_cycles -= clock_delta >> step_fractional_bits_clock;
-
-    if(cd.cdda_access_cycles <= 0)
-    {
-      cd.cdda_access_cycles = 0;
-      cd_set_status(SCSI_STATUS_MESSAGE_GOOD);
-      cd_raise_event(CD_IRQ_DATA_TRANSFER_DONE);
-    }
-  }
-
-  if((cd.cdda_status == CDDA_STATUS_PLAYING) && (!cd.cdda_access_cycles))
-  {
-    s32 sample_l, sample_r;
-
-    while(clock_delta >= 0)
-    {
-      cd.last_sector_type = CD_SECTOR_LOAD_AUDIO;
-      cd.last_sector_address = cd.cdda_sector_address;
-
-      // Check to see if the end of the current sector has been hit
-      if(cd.cdda_read_offset == (2352 / 2))
-      {
-        if(cd.cdda_sector_address == cd.cdda_end_sector_address)
-        {
-          switch(cd.cdda_play_mode)
-          {
-            default:
-            case CDDA_PLAY_MODE_STOP:
-              cd.cdda_status = CDDA_STATUS_STOPPED;
-              break;
-
-            case CDDA_PLAY_MODE_STOP_INTERRUPT:
-              cd.cdda_status = CDDA_STATUS_STOPPED;
-              cd_raise_event(CD_IRQ_DATA_TRANSFER_DONE);
-              break;
-
-            case CDDA_PLAY_MODE_REPEAT:
-            case CDDA_PLAY_MODE_REPEAT2:
-              cd.cdda_sector_address = cd.cdda_start_sector_address;
-              break;
-          }
-        }
-
-        if(cd.cdda_status == CDDA_STATUS_STOPPED)
-          break;
-
-        cd.cdda_read_offset = 0;
-        bin_cue_read_sector_audio(cd.cdda_cache, cd.cdda_sector_address);
-        cd.last_sector_address = cd.cdda_sector_address;
-        cd.cdda_sector_address++;
-
-        cd.cdda_cycles += cd.cdda_sector_cycle_interval;
-      }
-
-      sample_l = cd.cdda_cache[cd.cdda_read_offset];
-      sample_r = cd.cdda_cache[cd.cdda_read_offset + 1];
-
-      audio.buffer[cd.cdda_audio_buffer_index] +=
-       sample_l * cd.cdda_volume;
-      audio.buffer[cd.cdda_audio_buffer_index + 1] +=
-       sample_r * cd.cdda_volume;
-
-      cd.cdda_read_offset += 2;
-      cd.cdda_audio_buffer_index =
-       (cd.cdda_audio_buffer_index + 2) % AUDIO_BUFFER_SIZE;
-
-      cd.cdda_cycles -= psg.clock_step;
-      clock_delta -= psg.clock_step;
-
-      if(cd.cdda_cycles < 0)
-        break;
-    }
-  }
-
-  while(clock_delta >= 0)
-  {
-    cd.cdda_audio_buffer_index =
-     (cd.cdda_audio_buffer_index + 2) % AUDIO_BUFFER_SIZE;
-
-    clock_delta -= psg.clock_step;
-  }
-
-  cd.last_cdda_cycles -= clock_delta;
 }
 
 void save_bram(char *path)

@@ -2361,10 +2361,8 @@ void patch_idle_loop()
   if(idle_branch_pc != 0)
   {
     // Patch branch
-    printf("patching idle loop (%04x, pcs %x %x %x %x):\n", idle_loop_base_pc,
-     pc_scanned[0], pc_scanned[1], pc_scanned[2], pc_scanned[3]);
-    disasm_block(idle_loop_base_pc, idle_position_state + 1);
-
+    /*printf("patching idle loop (%04x, pcs %x %x %x %x):\n", idle_loop_base_pc,
+     pc_scanned[0], pc_scanned[1], pc_scanned[2], pc_scanned[3]);*/
     store_mem_safe(idle_loop_patch, idle_branch_pc);
   }
 }

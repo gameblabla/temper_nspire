@@ -500,16 +500,16 @@ void setup_io_tables()
     current_io_read_function[0xE] = io_buffer_read;
     current_io_read_function[0xF] = io_buffer_read;
 
-    current_io_write_function[0x0] = psg_channel_select;
-    current_io_write_function[0x1] = psg_global_balance;
-    current_io_write_function[0x2] = psg_fine_frequency;
-    current_io_write_function[0x3] = psg_rough_frequency;
-    current_io_write_function[0x4] = psg_channel_control;
-    current_io_write_function[0x5] = psg_channel_balance;
-    current_io_write_function[0x6] = psg_sound_data;
-    current_io_write_function[0x7] = psg_noise_control;
-    current_io_write_function[0x8] = psg_lfo_frequency;
-    current_io_write_function[0x9] = psg_lfo_control;
+    current_io_write_function[0x0] = null_write;
+    current_io_write_function[0x1] = null_write;
+    current_io_write_function[0x2] = null_write;
+    current_io_write_function[0x3] = null_write;
+    current_io_write_function[0x4] = null_write;
+    current_io_write_function[0x5] = null_write;
+    current_io_write_function[0x6] = null_write;
+    current_io_write_function[0x7] = null_write;
+    current_io_write_function[0x8] = null_write;
+    current_io_write_function[0x9] = null_write;
     current_io_write_function[0xA] = null_write;
     current_io_write_function[0xB] = null_write;
     current_io_write_function[0xC] = null_write;
@@ -589,10 +589,10 @@ void setup_io_tables()
         current_io_read_function[0x7] = cd_read_sub_channel;
         current_io_read_function[0x8] = cd_read_data_acknowledge;
         current_io_read_function[0x9] = zero_read;
-        current_io_read_function[0xA] = adpcm_read;
-        current_io_read_function[0xB] = adpcm_dma_status;
-        current_io_read_function[0xC] = adpcm_status;
-        current_io_read_function[0xD] = adpcm_read_command;
+        current_io_read_function[0xA] = zero_read;
+        current_io_read_function[0xB] = zero_read;
+        current_io_read_function[0xC] = zero_read;
+        current_io_read_function[0xD] = zero_read;
         current_io_read_function[0xE] = zero_read;
         current_io_read_function[0xF] = zero_read;
       }
@@ -627,13 +627,13 @@ void setup_io_tables()
       current_io_write_function[0x5] = cd_prepare_cdda_read;
       current_io_write_function[0x6] = cd_prepare_cdda_read;
       current_io_write_function[0x7] = cd_enable_bram;
-      current_io_write_function[0x8] = adpcm_write_latch_low;
-      current_io_write_function[0x9] = adpcm_write_latch_high;
-      current_io_write_function[0xA] = adpcm_write_data;
-      current_io_write_function[0xB] = adpcm_enable_dma;
+      current_io_write_function[0x8] = null_write;
+      current_io_write_function[0x9] = null_write;
+      current_io_write_function[0xA] = null_write;
+      current_io_write_function[0xB] = null_write;
       current_io_write_function[0xC] = null_write;
-      current_io_write_function[0xD] = adpcm_write_command;
-      current_io_write_function[0xE] = adpcm_playback_rate;
+      current_io_write_function[0xD] = null_write;
+      current_io_write_function[0xE] = null_write;
       current_io_write_function[0xF] = cd_fadeout;
     }
     else

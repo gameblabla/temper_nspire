@@ -53,7 +53,7 @@ config_struct config =
 
 void synchronize()
 {
-  static u64 last_ticks = 0;
+  /*static u64 last_ticks = 0;
 
   if(last_ticks != 0)
   {
@@ -69,7 +69,7 @@ void synchronize()
       delay_us(delay);
   }
 
-  get_ticks_us(&last_ticks);
+  get_ticks_us(&last_ticks);*/
 }
 
 void platform_initialize()

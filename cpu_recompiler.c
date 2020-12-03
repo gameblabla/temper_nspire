@@ -3,6 +3,12 @@
 #include "common.h"
 #include "op_list.h"
 
+#define profile_opcode_type(op)
+#define profile_memory_region(address, type)
+#define profile_paging(type, region)
+#define profile_memory_zp(type)
+
+
 // Register layout:
 // Caller save: eax, ecx, edx are preferable for temporaries but that's where
 // all the choice 8bit registers are.
@@ -295,7 +301,7 @@
   update_pc();                                                                \
 }                                                                             \
 
-#define check_pending_interrupts()                                            \
+#define check_pending_interrupts(a)                                            \
   if(((irq.status & (IRQ_CD | IRQ_VDC | IRQ_TIMER)) & ~irq.enable) &&         \
    ((p & (1 << I_FLAG_BIT)) == 0))                                            \
   {                                                                           \
@@ -1710,7 +1716,6 @@ cpu_struct cpu;
                                                                               \
   } while(cpu_cycles_remaining > 0)                                           \
 
-#ifndef GP2X_BUILD
 
 void execute_instructions(s32 cpu_cycles_remaining)
 {
@@ -1786,6 +1791,7 @@ void execute_instructions(s32 cpu_cycles_remaining)
       goto reenter_execute_loop;
   }
 
+  cpu_execution_done:
   collapse_flags();
   retrieve_pc(cpu.pc);
 
@@ -1801,7 +1807,6 @@ void execute_instructions(s32 cpu_cycles_remaining)
     cpu.extra_cycles = -cpu_cycles_remaining;
 }
 
-#endif
 
 void initialize_cpu()
 {
@@ -2151,10 +2156,8 @@ void patch_idle_loop()
   if(idle_branch_pc != 0)
   {
     // Patch branch
-    printf("patching idle loop (%04x, pcs %x %x %x x):\n", idle_loop_base_pc,
-     pc_scanned[0], pc_scanned[1], pc_scanned[2], pc_scanned[3]);
-    disasm_block(idle_loop_base_pc, idle_position_state + 1);
-
+    /*printf("patching idle loop (%04x, pcs %x %x %x x):\n", idle_loop_base_pc,
+     pc_scanned[0], pc_scanned[1], pc_scanned[2], pc_scanned[3]);*/
     store_mem_safe(idle_loop_patch, idle_branch_pc);
   }
 }

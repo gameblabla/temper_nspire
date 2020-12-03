@@ -1988,16 +1988,8 @@ name##_ext_src_dest:;                                                         \
 
 // Comment this in/out to enable/disable debugging
 
-#ifdef DEBUGGER_ON
-
-#define perform_step_debug()                                                  \
-   bl _step_debug                                                             \
-
-#else
-
 #define perform_step_debug()                                                  \
 
-#endif
 
 // Defining op will specify what op_list should expand to when used
 // (op_list is defined in op_list.h)
@@ -2157,15 +2149,12 @@ name##_ext_src_dest:;                                                         \
 // pass through filter we can catch then ignore these.
 
 #define op_sd2(operation, addr_mode, addr_range)                              \
-  perform_step_debug();                                                       \
   op_##operation(addr_mode, addr_range)                                       \
 
 #define op_sd3(operation, addr_mode, addr_range, a1)                          \
-  perform_step_debug();                                                       \
   op_##operation(addr_mode, addr_range, a1)                                   \
 
 #define op_sd4(operation, addr_mode, addr_range, a1, a2)                      \
-  perform_step_debug();                                                       \
   op_##operation(addr_mode, addr_range, a1, a2)                               \
 
 
@@ -2806,67 +2795,6 @@ typedef struct
 } irq_struct;
 
 */
-
-// void step_debug(int a, int x, int y, int p, int s, int pc, int remaining)
-
-#define DEBUG_RUN                  1
-#define DEBUG_COUNTDOWN_BREAKPOINT 4
-
-#define DEBUG_MODE_OFFSET                  (ext_symbol(debug) + 0x20)
-#define DEBUG_BREAKPOINT_OFFSET            (ext_symbol(debug) + 0x4)
-#define DEBUG_INSTRUCTION_COUNT_OFFSET     (ext_symbol(debug) + 0x0)
-#define DEBUG_BREAKPOINT_ORIGINAL_OFFSET   (ext_symbol(debug) + 0x8)
-
-
-0:
-  .long DEBUG_MODE_OFFSET
-  .long DEBUG_BREAKPOINT_OFFSET
-  .long DEBUG_INSTRUCTION_COUNT_OFFSET
-  .long DEBUG_BREAKPOINT_ORIGINAL_OFFSET
-
-_step_debug:
-  ldr r0, 0b                                @ r0 = debug_mode pointer
-  ldr r1, 0b + 0x4                          @ r1 = breakpoint pointer
-  ldr r0, [r0]                              @ r0 = debug_mode
-  cmp r0, #(DEBUG_COUNTDOWN_BREAKPOINT)     @ counting down?
-  bne _step_debug4                          @ if not, do a real step_debug
-  ldr r0, [r1]                              @ r14 = breakpoint
-  subs r0, r0, #1                           @ count down breakpoint
-  beq _step_debug3                          @ if hit 0, do a real step_debug
-  str r0, [r1]                              @ otherwise, store breakpoint
-  bx lr                                     @ and return
-
-_step_debug3:                               @ need to add instructions skipped
-  ldr r0, 0b + 0xC                          @ r0 = breakpoint_original ptr
-  ldr r1, 0b + 0x8                          @ r1 = debug_instruction_count ptr
-  ldr r0, [r0]                              @ r0 = breakpoint_original
-  ldr r1, [r1]                              @ r1 = debug_instruction_count
-  add r1, r0, r1                            @ add skipped instructions
-  ldr r0, 0b + 0x8                          @ get this pointer back
-  sub r1, r1, #1                            @ actually, it's one less
-  str r1, [r0]                              @ store new instruction count
-  b _step_debug2                            @ go to real step debug handler
-
-_step_debug4:                               @ see if it's run mode
-  cmp r0, #(DEBUG_RUN)                      @ run mode?
-  bxeq lr                                   @ if so can return
-
-_step_debug2:
-  stmdb sp!, { r2, r3, r12, lr }            @ these will be overwritten, save them
-  mov r0, reg_s, lsr #24
-  retrieve_pc(r1)                           @ r1 = pc
-  sub r1, r1, #1                            @ roll back one to undo fetch
-  mov r2, reg_cycles, asr #8                @ overwrites r2 (reg_code_page)
-  add r2, r2, #1                            @ fix offset
-  stmdb sp!, { r0, r1, r2 }                 @ store last three args on the stack
-  mov r0, reg_a, lsr #24                    @ move reg_a into arg0
-  mov r1, reg_x, lsr #24                    @ move reg_x into arg1
-  mov r2, reg_y, lsr #24                    @ move reg_y into arg2
-  collapse_flags(r3)                        @ move p into arg3
-  call_c(step_debug)                        @ all function
-  add sp, sp, #(0x4 * 3)                    @ take args off the stack
-  ldmia sp!, { r2, r3, r12, pc }            @ take other stuff off, return
-
 
 @ PC is overflowed, real PC is retrieved PC + 0x2000
 

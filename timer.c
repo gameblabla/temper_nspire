@@ -73,15 +73,18 @@ s32 add_cycles;
 
 #ifdef ARM_ARCH
 
-void execute_instructions_compatible(u32 count);
+//void execute_instructions_compatible(u32 count);
 void execute_instructions_fast(u32 count);
-
+#define execute_instructions(count)                                           \
+    execute_instructions_fast(count)                                          \
+    
+/*
 #define execute_instructions(count)                                           \
   if(config.compatibility_mode)                                               \
     execute_instructions_compatible(count);                                   \
   else                                                                        \
     execute_instructions_fast(count)                                          \
-
+*/
 #endif
 
 void execute_instructions_timer(s32 cpu_cycles_remaining)

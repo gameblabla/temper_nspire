@@ -115,31 +115,6 @@ u32 process_arguments(int argc, char *argv[])
 
     switch(current_option)
     {
-      case 0:
-        switch(option_index)
-        {
-          case 5:
-            debug.breakpoint = strtol(optarg, NULL, 16) + 1;
-            debug.breakpoint_original = debug.breakpoint;
-            set_debug_mode(DEBUG_COUNTDOWN_BREAKPOINT);
-            break;
-
-          case 6:
-            debug.breakpoint = strtol(optarg, NULL, 16);
-            debug.breakpoint_original = debug.breakpoint;
-            set_debug_mode(DEBUG_PC_BREAKPOINT);
-            printf("Breakpoint set to PC %04x", debug.breakpoint);
-            break;
-
-          default:
-            break;
-        }
-        break;
-
-      case 'd':
-        set_debug_mode(DEBUG_STEP);
-        break;
-
       case 'b':
         config.benchmark_mode = 1;
         break;
@@ -237,7 +212,7 @@ int main(int argc, char *argv[])
   while(1)
   {
     /*synchronize();*/
-
+/*
 #ifdef FASTFORWARD_FRAMESKIP
     if(config.fast_forward && !config.benchmark_mode)
     {
@@ -252,9 +227,9 @@ int main(int argc, char *argv[])
       update_frame(0);
     }
 
-#else
+#else*/
     update_frame(0);
-#endif
+//#endif
 
     update_events();
 
@@ -282,7 +257,6 @@ void initialize_pce()
   initialize_cpu();
   initialize_cd();
   initialize_arcade_card();
-  initialize_debug();
 }
 
 void reset_pce()
@@ -295,8 +269,6 @@ void reset_pce()
   reset_cpu();
   reset_cd();
   reset_arcade_card();
-
-  reset_debug();
 }
 
 // For now this will save a full sized snapshot.
@@ -378,13 +350,11 @@ void save_state(char *file_name, u16 *snapshot)
   io_store_savestate(savestate_file);
   irq_store_savestate(savestate_file);
   timer_store_savestate(savestate_file);
-  psg_store_savestate(savestate_file);
   cpu_store_savestate(savestate_file);
 
   if(config.cd_loaded)
   {
     cd_store_savestate(savestate_file);
-    adpcm_store_savestate(savestate_file);
 
     if(savestate_header.extensions & SS_EXT_SUPER_CD_DATA)
       file_write_mem_array(savestate_file, cd.ext_ram);
@@ -550,7 +520,6 @@ savestate_extension_enum load_state(char *file_name, u8 *in_memory_state,
   io_load_savestate(savestate_file);
   irq_load_savestate(savestate_file);
   timer_load_savestate(savestate_file);
-  psg_load_savestate(savestate_file);
   cpu_load_savestate(savestate_file);
 
   config.cd_loaded = 0;
@@ -561,7 +530,6 @@ savestate_extension_enum load_state(char *file_name, u8 *in_memory_state,
   {
     config.cd_loaded = 1;
     cd_load_savestate(savestate_file);
-    adpcm_load_savestate(savestate_file);
 
     if(savestate_header.extensions & SS_EXT_SUPER_CD_DATA)
       file_read_mem_array(savestate_file, cd.ext_ram);

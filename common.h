@@ -6,6 +6,8 @@ typedef signed char s8;
 typedef unsigned short int u16;
 typedef signed short int s16;
 
+#define MASTER_CLOCK_RATE 21477270ll
+
 // For some reason, other libraries define these on PSP
 
 #ifndef PSP_BUILD
@@ -258,19 +260,15 @@ typedef struct
 
 
 #include "cpu.h"
-#include "debug.h"
 #include "memory.h"
 #include "video.h"
 #include "irq.h"
 #include "io.h"
 #include "timer.h"
-#include "psg.h"
 #include "main.h"
-#include "disasm.h"
 #include "event.h"
 #include "menu.h"
 #include "cd.h"
-#include "adpcm.h"
 #include "arcade_card.h"
 #include "netplay.h"
 #include "screen.h"
