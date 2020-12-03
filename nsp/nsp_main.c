@@ -8,7 +8,7 @@ void get_ticks_us(u64 *ticks_return)
 
 void delay_us(u32 delay)
 {
-	sleep(delay/100);
+	msleep(delay/100);
 }
 
 config_struct config =

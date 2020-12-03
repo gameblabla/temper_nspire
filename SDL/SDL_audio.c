@@ -1,5 +1,8 @@
 #include "../common.h"
 
+#ifndef Uint8
+#define Uint8 uint8_t
+#endif
 
 void audio_callback(void *userdata, Uint8 *stream, int length)
 {

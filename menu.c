@@ -1,6 +1,7 @@
 // Temper menu code
 
 #include "common.h"
+#include <strings.h>
 
 #define menu_line(line)                                                       \
   (line * 8)                                                                  \

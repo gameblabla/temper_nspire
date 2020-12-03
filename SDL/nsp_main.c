@@ -74,7 +74,7 @@ void synchronize()
 
 void platform_initialize()
 {
-	SDL_Init(SDL_INIT_VIDEO);
+	//SDL_Init(SDL_INIT_VIDEO);
 	initBuffering();
 	clearBufferB();
 	updateScreen();
@@ -83,6 +83,6 @@ void platform_initialize()
 void platform_quit()
 {
 	deinitBuffering();
-	SDL_Quit();
+	//SDL_Quit();
 }
 

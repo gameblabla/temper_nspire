@@ -1,4 +1,5 @@
 #include "common.h"
+#include <strings.h>
 
 #ifdef ARM_ARCH
 

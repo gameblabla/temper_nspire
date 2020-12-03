@@ -167,8 +167,6 @@
 
 #ifdef NSPIRE_BUILD
 
-#define SDL_INIT        (SDL_INIT_VIDEO)
-
 #define COLOR_RGB_565
 
 #define KEYBOARD_SUPPORT

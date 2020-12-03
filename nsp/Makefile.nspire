@@ -9,7 +9,7 @@ STRIP     =
 
 OBJS      = main.o cpu.o memory.o irq.o io.o video.o timer.o psg.o disasm.o    \
             screen.o event.o audio.o menu.o debug.o cd.o adpcm.o   \
-            arcade_card.o bin_cue.o crc32.o                                           \
+            arcade_card.o bin_cue.o                                          \
             nsp_main.o nsp_screen.o SDL_audio.o nsp_input.o SDL_menu.o n2DLib.o
 BIN       = temper
 
@@ -34,9 +34,7 @@ LIBS       = -Wl,--as-needed -Wl,--gc-sections -flto
 
 all:	${OBJS}
 	${CC} ${OBJS} ${LIBS} -o ${BIN}  
-	genzehn --input ${BIN} --output ${BIN}.t --compress
-	make-prg ${BIN}.t ${BIN}.tns
-	rm temper temper.t
+	genzehn --input ${BIN} --output ${BIN}.tns --compress
 
 clean:
 	rm -f *.o ${BIN} 

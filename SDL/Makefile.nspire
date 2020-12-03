@@ -10,31 +10,31 @@ STRIP     =
 OBJS      = main.o cpu.o memory.o irq.o io.o video.o timer.o psg.o disasm.o    \
             screen.o event.o audio.o menu.o debug.o cd.o adpcm.o   \
             arcade_card.o bin_cue.o                                            \
-            nsp_main.o nsp_screen.o SDL_audio.o SDL_event.o SDL_menu.o n2DLib.o
+            nsp_main.o nsp_screen.o SDL_audio.o nsp_event.o SDL_menu.o n2DLib.o
 BIN       ?= temper 
 
 # Platform specific definitions 
 
 VPATH      += .. ../SDL 
 VPATH      += ../arm
-CFLAGS     += -DNSPIRE_BUILD -mcpu=arm926ej-s -mtune=arm926ej-s
-CFLAGS     += -Ofast -std=c99 -funsigned-char -msoft-float
+CFLAGS     += -DNSPIRE_BUILD
+CFLAGS     +=  -Ofast -fomit-frame-pointer -fdata-sections -ffunction-sections -marm -march=armv5te -mtune=arm926ej-s -flto -std=c99 -funsigned-char -msoft-float
 INCLUDES   =
-LIBS       = -Wl,--as-needed -flto -lSDL
+LIBS       = -Wl,--as-needed -Wl,--gc-sections -flto
 
 # Compilation:
 
 .SUFFIXES: .c .S
 
 %.o: %.c
-	${CC} ${CFLAGS} ${INCLUDES} -c -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
 %.o: %.S
-	${AS} -o $@ $<
+	$(AS) -o $@ $<
 
-all:	${OBJS}
-	${CC} ${OBJS} ${LIBS} -o ${BIN}  
+all:	$(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) $(LIBS) -o $(BIN)  
 
 clean:
-	rm -f *.o ${BIN} 
+	rm -f *.o $(BIN) 
 

@@ -7,21 +7,14 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-typedef int Fixed;
+typedef int32_t Fixed;
 typedef struct
 {
-	int x;
-	int y;
-	int h;
-	int w;
+	int32_t x;
+	int32_t y;
+	int32_t h;
+	int32_t w;
 } Rect;
-
-#define itofix(x) ((x) << 8)
-#define fixtoi(x) ((x) >> 8)
-#define fixdiv(x, y) (((x) << 8) / (y))
-#define clamp(x, a, b) min(max(x, a), b)
-#define sign(x) ((x) < 0)
-#define fixsin(x) fixcos((x) - 64)
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,20 +24,19 @@ extern void initBuffering();
 extern void updateScreen();
 extern void deinitBuffering();
 extern void clearBufferB();
-extern unsigned short getPixel(const unsigned short*, unsigned int, unsigned int);
-extern void setPixelUnsafe(unsigned int, unsigned int, unsigned short);
-extern void setPixel(unsigned int, unsigned int, unsigned short);
-extern void fillRectUnsafe(int x, int y, int w, int h, unsigned short c);
-extern void fillRect(int, int, int, int, unsigned short);/*
-extern void drawString(int*, int*, int, const char*, unsigned short, unsigned short);*/
-extern void drawChar(int*, int*, int, char, unsigned short, unsigned short);
-extern int numberWidth(int);
-extern int stringWidth(const char*);/*
-extern int get_key_pressed(t_key*);
-extern int isKey(t_key, t_key);*/
-
+extern uint16_t getPixel(const uint16_t*, uint32_t, uint32_t);
+extern void setPixelUnsafe(uint32_t, uint32_t, uint16_t);
+extern void setPixel(uint32_t, uint32_t, uint16_t);
+extern void drawHLine(int32_t, int32_t, int32_t, uint16_t);
+extern void drawVLine(int32_t, int32_t, int32_t, uint16_t);
+extern void fillRect(int32_t, int32_t, int32_t, int32_t, uint16_t);
+extern void drawLine(int32_t, int32_t, int32_t, int32_t, uint16_t);
+extern void drawString(int32_t*, int32_t*, int32_t, const int8_t*, uint16_t, uint16_t);
+extern void drawChar(int32_t*, int32_t*, int32_t, int8_t, uint16_t, uint16_t);
+extern int32_t numberWidth(int32_t);
+extern int32_t stringWidth(const int8_t*);
 #define BUFF_BYTES_SIZE (320*240*2)
-extern unsigned short *BUFF_BASE_ADDRESS;
+extern uint16_t *BUFF_BASE_ADDRESS;
 #ifdef __cplusplus
 }
 #endif
