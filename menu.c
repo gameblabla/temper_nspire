@@ -1470,7 +1470,9 @@ void select_restart(menu_state_struct *menu_state,
 void select_quit(menu_state_struct *menu_state,
  menu_option_struct *menu_option)
 {
-  quit();
+	extern uint8_t sdl_quit;
+	sdl_quit = 0;
+	menu_state->exit_menu = 1;
 }
 
 void select_return(menu_state_struct *menu_state,

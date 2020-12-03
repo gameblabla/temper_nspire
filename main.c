@@ -1,5 +1,7 @@
 #include "common.h"
 
+uint8_t sdl_quit = 1;
+
 void setup_main_dirs()
 {
  	struct stat sb;
@@ -46,129 +48,17 @@ void setup_main_dirs()
 	}
 }
 
-const u32 benchmark_frame_interval = 1000;
-
-void benchmark_step()
-{
-  static u64 benchmark_ms;
-  static u32 benchmark_number = 0;
-
-  switch(benchmark_number)
-  {
-    case 0:
-      delay_us(1000 * 2500);
-
-      get_ticks_us(&benchmark_ms);
-      break;
-
-    case 1:
-    {
-      u64 new_ms;
-      u32 ms_delta;
-
-      get_ticks_us(&new_ms);
-      ms_delta = (new_ms - benchmark_ms) / 1000;
-
-      printf("benchmark took %d ms (%lf ms per frame)\n",
-       ms_delta, (double)ms_delta / benchmark_frame_interval);
-
-		quit();
-      break;
-    }
-  }
-
-  benchmark_number++;
-}
-
-// TODO: Count argcs
-u32 process_arguments(int argc, char *argv[])
-{
-  u32 options_parsed = 0;
-  u32 current_option;
-  s32 option_index;
-
-  static struct option long_options[] =
-  {
-    { "netplay-server", no_argument, NULL, 0 },
-    { "netplay-connect", required_argument, NULL, 0 },
-    { "netplay-port", required_argument, NULL, 0 },
-    { "netplay-latency", required_argument, NULL, 0 },
-    { "netplay-username", required_argument, NULL, 0 },
-    { "countdown-breakpoint", required_argument, NULL, 0 },
-    { "pc-breakpoint", required_argument, NULL, 0 },
-  };
-
-  config.benchmark_mode = 0;
-  config.fast_forward = 0;
-  config.load_state_0 = 0;
-  config.relaunch_shell_on_quit = 1;
-
-  while(1)
-  {
-    current_option = getopt_long(argc, argv, "dbfsx",
-     long_options, &option_index);
-
-    if(current_option == -1)
-      break;
-
-    options_parsed++;
-
-    switch(current_option)
-    {
-      case 'b':
-        config.benchmark_mode = 1;
-        break;
-
-      case 'f':
-        config.fast_forward = 1;
-        break;
-
-      case 's':
-        config.load_state_0 = 1;
-        break;
-
-      case 'x':
-        printf("Not relaunching shell on quit.\n");
-        config.relaunch_shell_on_quit = 0;
-        break;
-    }
-  }
-
-  return options_parsed;
-}
-
 int main(int argc, char *argv[])
 {
-  u32 command_line_options;
-  u32 benchmark_frames = benchmark_frame_interval;
-  
 #ifdef _TINSPIRE
 	enable_relative_paths(argv);
 #endif
-
-
   //config.use_opengl = 1;
-
-  printf("platform initialize now\n");
   platform_initialize();
-
-
-  printf("sizeof(cpu_struct): %d\n", sizeof(cpu_struct));
-
-  printf("Setting up main directories.\n");
   setup_main_dirs();
-
-  printf("Initialize PCE\n");
   initialize_pce();
-
-  printf("Loading secondary configuration file\n");
   load_directory_config_file("temper.cf2.tns");
-
-  printf("Loading primary configuration file\n");
   load_config_file("temper.cfg.tns");
-
-  printf("Processing arguments\n");
-  command_line_options = process_arguments(argc, argv);
 
   if((argc > 1) && (argv[argc - 1][0] != '-'))
   {
@@ -183,11 +73,10 @@ int main(int argc, char *argv[])
   }
   else
   {
-    printf("Starting menu\n");
     menu(1);
   }
 
-  if(config.load_state_0)
+  /*if(config.load_state_0)
   {
     char state_name[MAX_PATH];
     sprintf(state_name, "%s_0.svs.tns", config.rom_filename);
@@ -205,11 +94,9 @@ int main(int argc, char *argv[])
     benchmark_step();
 
     config.fast_forward = 1;
-  }
+  }*/
 
-  printf("Running game.\n");
-
-  while(1)
+  while(sdl_quit)
   {
     /*synchronize();*/
 /*
@@ -232,7 +119,7 @@ int main(int argc, char *argv[])
 //#endif
 
     update_events();
-
+/*
     if(config.benchmark_mode)
     {
       benchmark_frames--;
@@ -241,8 +128,10 @@ int main(int argc, char *argv[])
         benchmark_step();
         benchmark_frames = benchmark_frame_interval;
       }
-    }
+    }*/
   }
+  
+  quit();
 
   return 0;
 }
@@ -1044,7 +933,6 @@ void quit()
   audio_exit();
   platform_quit();
 
-  exit(0);
 }
 
 void status_message_raw(char *message)

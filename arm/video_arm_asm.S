@@ -302,4 +302,3 @@ render_bg_line_cache_tile:
   strb r3, [r6, r1]                    @ dirty_tiles[tile_number] = 0
   b render_bg_line_tile_cached         @ return to render loop
 
-#endif

@@ -3,7 +3,7 @@
 
 # Global definitions
 
-AS 		  = nspire-gcc
+AS 		  = nspire-as
 CC        = nspire-gcc
 STRIP     = 
 
@@ -17,8 +17,8 @@ BIN       = temper.elf
 
 VPATH      += .. . 
 VPATH      += ../arm
-CFLAGS     += -DNSPIRE_BUILD -mcpu=arm926ej-s -mtune=arm926ej-s
-CFLAGS     += -O2 -fdata-sections -ffunction-sections -marm -march=armv5te -mtune=arm926ej-s -std=c99 -funsigned-char -flto
+CFLAGS     += -DNSPIRE_BUILD -mcpu=arm926ej-s -mtune=arm926ej-s -DARM_FAST
+CFLAGS     += -Ofast -fdata-sections -ffunction-sections -marm -march=armv5te -mtune=arm926ej-s -std=gnu99 -funsigned-char -flto
 INCLUDES   =
 LDFLAGS       = -lc -lgcc -Wl,--as-needed -Wl,--gc-sections -flto
 
@@ -34,7 +34,7 @@ LDFLAGS       = -lc -lgcc -Wl,--as-needed -Wl,--gc-sections -flto
 
 all:	$(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $(LDFLAGS) -o $(BIN)  
-	genzehn --input $(BIN) --output $(BIN).tns --compress
+	genzehn --input $(BIN) --output temper.tns --compress
 
 clean:
 	rm -f *.o $(BIN) 

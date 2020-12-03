@@ -73,10 +73,19 @@ s32 add_cycles;
 
 #ifdef ARM_ARCH
 
-//void execute_instructions_compatible(u32 count);
+#ifdef ARM_FAST
+
 void execute_instructions_fast(u32 count);
 #define execute_instructions(count)                                           \
     execute_instructions_fast(count)                                          \
+    
+#else
+
+void execute_instructions_compatible(u32 count);
+#define execute_instructions(count)                                           \
+    execute_instructions_compatible(count)                                          \
+    
+#endif
     
 /*
 #define execute_instructions(count)                                           \

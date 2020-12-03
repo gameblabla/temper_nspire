@@ -1,5 +1,15 @@
 #include "common.h"
 
+/*
+ * Here's how it's calculated according to pcetech.txt :
+ * The frame counter offset is the substration of VDS and VSW.
+ * We set it to 14 because that was the default in Temper
+ * but obviously it should be calculated as such when VDS/VSW change
+ * as it's done below.
+*/
+static u32 frame_counter_offset = 14;
+
+
 // Put temp debug vars here
 
 u64 scanline_cycle_counter;
@@ -746,6 +756,8 @@ void vce_control_write(u32 value)
 
   if(config.sgx_mode)
     vdc_update_width(&vdc_b);
+	
+	frame_counter_offset = vdc_a.vds + vdc_a.vsw;
 
   // Interlace bit determines how many scanlines there are.
   if(value & 0x4)
@@ -2163,10 +2175,10 @@ void vdc_render_line(vdc_struct *vdc, u8 **bg_buffer, u32 **bg_mask_buffer,
 
 void render_line(void)
 {
-  if((vce.frame_counter >= 14) &&
-   (vce.frame_counter < (14 + RESOLUTION_HEIGHT)))
+  if((vce.frame_counter >= frame_counter_offset) &&
+   (vce.frame_counter < (frame_counter_offset + RESOLUTION_HEIGHT)))
   {
-    u32 scanline_line = vce.frame_counter - 14;
+    u32 scanline_line = vce.frame_counter - frame_counter_offset;
 
     // Pad by 32 on either side to allow rendering off the edges. In reality,
     // only 16 pixels are needed, but 32 are given so that everything stays aligned
@@ -2232,10 +2244,10 @@ void render_line_sgx(void)
     vpc.windows_dirty = 0;
   }
 
-  if((vce.frame_counter >= 14) &&
-   (vce.frame_counter < (14 + RESOLUTION_HEIGHT)))
+  if((vce.frame_counter >= frame_counter_offset) &&
+   (vce.frame_counter < (frame_counter_offset + RESOLUTION_HEIGHT)))
   {
-    u32 scanline_line = vce.frame_counter - 14;
+    u32 scanline_line = vce.frame_counter - frame_counter_offset;
 
     // Pad by 32 on either side to allow rendering off the edges. In reality,
     // only 16 pixels are needed, but 32 are given so that everything stays aligned
@@ -3129,21 +3141,21 @@ void update_status_message(void)
 
 void update_frame(u32 skip)
 {
-  static u32 input_message_last;
+  //static u32 input_message_last;
 
   if(config.sgx_mode)
     update_frame_execute_sgx(skip);
   else
     update_frame_execute(skip);
 
-  set_font_wide();
+  /*set_font_wide();
   char print_buffer[128];
 
   if(config.fast_forward)
   {
     print_string("--FF--", 0xFFFF, 0x000, 320 - (6 * 6) -
      vce.screen_center_offset, 0, vce.screen_width);
-  }
+  }*/
 
 
   /*if(config.show_fps)
@@ -3176,7 +3188,7 @@ void update_frame(u32 skip)
     sprintf(print_buffer, "%02d/60", fps);
     print_string(print_buffer, 0xFFFF, 0x000, vce.screen_center_offset, 0,
      vce.screen_width);
-  }*/
+  }
 
   update_status_message();
 
@@ -3225,113 +3237,12 @@ void update_frame(u32 skip)
     }
 
     input_message_last = 0;
-  }
+  }*/
 
   vce.frames_rendered++;
 
   if(skip != 1)
     update_screen();
-}
-
-void dump_vram(u32 start, u32 size)
-{
-  u32 i, i2, offset;
-
-  for(i = 0, offset = start; i < size / 8; i++)
-  {
-    for(i2 = 0; i2 < 8; i2++, offset++)
-    {
-      printf("%04x ", vdc_a.vram[offset]);
-    }
-    printf("\n");
-  }
-}
-
-void dump_palette(u32 start, u32 size)
-{
-  u32 i, i2, offset;
-
-  for(i = 0, offset = start; i < size / 8; i++)
-  {
-    for(i2 = 0; i2 < 8; i2++, offset++)
-    {
-      printf("%04x ", vce.palette[offset]);
-    }
-    printf("\n");
-  }
-}
-
-void dump_spr(u32 start, u32 size)
-{
-  u32 i, offset;
-  u32 spr_a, spr_b, spr_c, spr_d;
-
-  char *ny = "ny";
-
-  for(i = 0, offset = start; i < size; i++)
-  {
-    spr_a = vdc_a.sat[(i * 4)];
-    spr_b = vdc_a.sat[(i * 4) + 1];
-    spr_c = vdc_a.sat[(i * 4) + 2];
-    spr_d = vdc_a.sat[(i * 4) + 3];
-
-    printf("spr %x: (%02x %02x %02x %02x)\n", i, spr_a, spr_b, spr_c, spr_d);
-    printf("  size: %d by %d\n", (((spr_d >> 8) & 0x1) + 1) * 16,
-     (((spr_d >> 12) & 0x3) + 1) * 16);
-    printf("  position: %d, %d\n", (spr_b & 0x3FF) - 32,
-     (spr_a & 0x3FF) - 64);
-    printf("  pattern: %x\n", (spr_c >> 1) & 0x1FF);
-    printf("  palette: %x\n", spr_d & 0xF);
-    printf("  hf: %c  vf %c  hp %c\n",
-     ny[(spr_d & SPRITE_ATTRIBUTE_HFLIP) != 0],
-     ny[(spr_d & SPRITE_ATTRIBUTE_VFLIP) != 0],
-     ny[(spr_d & SPRITE_ATTRIBUTE_PRIORITY) != 0]);
-    printf("\n");
-  }
-}
-
-void dump_sprites_per_line(u32 line)
-{
-  printf("%d sprites on line %d\n",
-   vdc_a.sat_cache.lines[line].num_present, line);
-}
-
-void dump_video_status_vdc(vdc_struct *vdc)
-{
-  printf("vdc.status: %04x\n", vdc->status);
-  printf("vdc.register_select: %04x\n", vdc->register_select);
-  printf("vdc.mawr: %04x\n", vdc->mawr);
-  printf("vdc.marr: %04x\n", vdc->marr);
-  printf("vdc.cr: %04x\n", vdc->cr);
-  printf("vdc.rcr: %04x\n", vdc->rcr);
-  printf("vdc.mwr: %04x\n", vdc->mwr);
-  printf("vdc.bxr: %04x\n", vdc->bxr);
-  printf("vdc.byr: %04x\n", vdc->byr);
-  printf("vdc.hds: %04x\n", vdc->hds);
-  printf("vdc.hsw: %04x\n", vdc->hsw);
-  printf("vdc.hdw: %04x\n", vdc->hdw);
-  printf("vdc.hde: %04x\n", vdc->hde);
-  printf("vdc.vds: %04x\n", vdc->vds);
-  printf("vdc.vsw: %04x\n", vdc->vsw);
-  printf("vdc.vdw: %04x\n", vdc->vdw);
-  printf("vdc.dcr: %04x\n", vdc->dcr);
-  printf("vdc.vcr: %04x\n", vdc->vcr);
-  printf("vdc.sour: %04x\n", vdc->sour);
-  printf("vdc.desr: %04x\n", vdc->desr);
-  printf("vdc.lenr: %04x\n", vdc->lenr);
-  printf("vdc.satb: %04x\n", vdc->satb);
-  printf("vdc.write_latch: %04x\n", vdc->write_latch);
-  printf("vdc.read_latch: %04x\n", vdc->read_latch);
-  printf("vdc.raster_line: %04x\n", vdc->raster_line);
-  printf("vdc.effective_byr: %04x\n", vdc->effective_byr);
-}
-
-void dump_video_status()
-{
-  dump_video_status_vdc(&vdc_a);
-  printf("vce.control: %04x\n", vce.control);
-  printf("vce.frame_counter: %04x\n", vce.frame_counter);
-  printf("vce.palette_offset: %04x\n", vce.palette_offset);
 }
 
 // Tile cache and pattern cache shouldn't be saved, so either make all the
@@ -3449,7 +3360,6 @@ void video_##type_b##_savestate(savestate_##type_b##_type savestate_file)     \
   video_savestate_vdc(type, type_b, version_gate, vdc_a);                     \
   if(config.sgx_mode)                                                         \
   {                                                                           \
-    printf("sgx stuff for savestate %s\n", #type);                            \
     video_savestate_vdc(type, type_b, version_gate, vdc_b);                   \
     file_##type##_variable(savestate_file, vpc.window1_value);                \
     file_##type##_variable(savestate_file, vpc.window2_value);                \
